@@ -1,1 +1,1 @@
-# Python_code
+# 簡単なPythonコードを記載
