@@ -9,13 +9,10 @@ from selenium.common.exceptions import TimeoutException
 import requests
 from bs4 import BeautifulSoup
 
-script_path = '/Users/ooekenfutoshi/Desktop/Code_Work/ローカル実行/rakuten_login/rakuten_auto_login.py'
-python_interpreter_path = '/Users/ooekenfutoshi/.pyenv/versions/3.12.0/bin/python'
+script_path = 'script_path'
+python_interpreter_path = 'python_interpreter_path'
 
 def fetch_financial_data(script_path):
-    # subprocessを使用してPythonスクリプトを実行
-
-
 # フルパスでPythonインタープリタを指定
     result = subprocess.run([python_interpreter_path, script_path], capture_output=True, text=True)
     if result.returncode != 0:
@@ -30,7 +27,7 @@ def fetch_financial_data(script_path):
             data[key.strip()] = int(value.replace(',', '').strip())
     return data
 
-def write_to_excel(data, filename='/Users/ooekenfutoshi/Desktop/資産推移02.xlsx'):
+def write_to_excel(data, filename='your_filename'):
     # 既存のワークブックを開くか、存在しない場合は新しいワークブックを作成
     try:
         wb = openpyxl.load_workbook(filename)
@@ -41,7 +38,7 @@ def write_to_excel(data, filename='/Users/ooekenfutoshi/Desktop/資産推移02.x
         ws.append(['キー', '値'])  # ヘッダーを追加する場合
 
     # セルにデータを書き込む
-    for i, (key, value) in enumerate(data.items(), start=403):
+    for i, (key, value) in enumerate(data.items(), start=1):
         ws[f'B{i}'] = key
         ws[f'C{i}'] = value
 
