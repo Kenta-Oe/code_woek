@@ -1,0 +1,7 @@
+{
+    "metrics": [
+      {"MetricName": "CPUUtilization", "Namespace": "AWS/EC2", "Period": 300, "Stat": "Average"},
+      {"MetricName": "DiskReadOps", "Namespace": "AWS/EC2", "Period": 300, "Stat": "Sum"}
+    ]
+  }
+  
