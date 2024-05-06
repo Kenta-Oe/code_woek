@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>学習タイマー</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>学習タイマー</h1>
+        <form id="scheduleForm">
+            <label for="taskName">タスク名を入力（例：数学の勉強）:</label>
+            <input type="text" id="taskName" placeholder="タスク名" required>
+
+            <label for="taskTime">タスクの開始日時を設定:</label>
+            <input type="datetime-local" id="taskTime" required>
+
+            <label for="taskColor">タスクの色を選択（色によってタスクの種類を区別できます）:</label>
+            <input type="color" id="taskColor" title="タスクの色を選択" value="#FFD700">
+
+            <button type="submit">タスク追加</button>
+        </form>
+        <ul id="taskList"></ul>
+    </div>
+    <audio id="alarmSound" src="alarm.mp3"></audio>
+    <script src="../static/scheduler.js"></script>
+</body>
+</html>
