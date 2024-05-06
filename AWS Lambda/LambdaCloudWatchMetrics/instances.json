@@ -1,0 +1,7 @@
+{
+    "instances": [
+      {"InstanceId": "i-abcdefgh1", "Name": "Server1"},
+      {"InstanceId": "i-abcdefgh2", "Name": "Server2"}
+    ]
+  }
+  
