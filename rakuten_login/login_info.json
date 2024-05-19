@@ -1,8 +1,12 @@
 {
-    "bank_syouken": {
-      "id": "XXXXX",  
-      "pass": "1234567890",
-      "url": "ログインURL"
-    }
+  "broker1": {
+    "id": "exampleID1",
+    "pass": "examplePass1",
+    "url": "https://example.com/login1"
+  },
+  "broker2": {
+    "id": "exampleID2",
+    "pass": "examplePass2",
+    "url": "https://example.com/login2"
+  }
 }
-  
