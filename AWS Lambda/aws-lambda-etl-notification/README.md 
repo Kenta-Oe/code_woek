@@ -1,0 +1,103 @@
+# AWS Lambda ETL and Notification Example
+
+このプロジェクトは、AWS Lambdaを使用してデータのETL（抽出、変換、ロード）処理を行い、その結果をAmazon SNSを介して通知する例を示しています。
+
+## 概要
+
+このプロジェクトは、以下のステップでデータのETLと通知を行います：
+
+1. **RDSインスタンスからのデータ抽出**：
+    - AWS Lambda関数が、RDSインスタンスに接続してデータを抽出します。
+    
+2. **データの変換**：
+    - 抽出されたデータを必要な形式に変換します。
+    
+3. **S3バケットへの保存**：
+    - 変換後のデータを指定されたS3バケットに保存します。
+    
+4. **SNS通知**：
+    - ETL処理が完了したことをSNSトピックに通知します。
+
+## ファイル構成
+
+- `lambda_etl_sns.py`: Lambda関数のコードを含むファイル。このファイルには、RDSからのデータ抽出、データ変換、S3への保存、SNS通知の全てのロジックが含まれています。
+
+## 前提条件
+
+このプロジェクトを実行するためには、以下のAWSリソースが必要です：
+
+1. **RDSインスタンス**：
+    - データを抽出するためのRDSインスタンス。
+    
+2. **S3バケット**：
+    - 変換されたデータを保存するためのS3バケット。
+    
+3. **SNSトピック**：
+    - 通知を送信するためのSNSトピック。
+
+## 設定手順
+
+1. **AWS Lambdaの設定**：
+    - AWS Lambdaコンソールで新しいLambda関数を作成し、`lambda_etl_sns.py`のコードをアップロードします。
+    
+2. **環境変数の設定**：
+    - Lambda関数の環境変数として、RDSの接続情報、S3バケット名、SNSトピックARNを設定します。
+
+3. **IAMロールの設定**：
+    - Lambda関数に適切なIAMロールを割り当て、RDS、S3、およびSNSにアクセスできるようにします。
+
+4. **CloudWatchイベントの設定**：
+    - CloudWatchイベントルールを作成し、定期的にLambda関数をトリガーするように設定します（例えば、毎日午前1時に実行）。
+
+## コードの説明
+
+`lambda_etl_sns.py` ファイルには以下のロジックが含まれます：
+
+```python
+import boto3
+import pymysql
+import json
+
+# S3クライアントの設定
+s3_client = boto3.client('s3')
+
+# RDSの接続情報
+rds_host = 'your-rds-endpoint'
+rds_user = 'your-username'
+rds_password = 'your-password'
+rds_db = 'your-database'
+
+# SNSクライアントの設定
+sns_client = boto3.client('sns')
+sns_topic_arn = 'your-sns-topic-arn'
+
+def lambda_handler(event, context):
+    # RDSに接続
+    conn = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
+    cursor = conn.cursor()
+    
+    # データの抽出
+    cursor.execute("SELECT * FROM your_table")
+    rows = cursor.fetchall()
+    
+    # データの変換処理
+    transformed_data = transform_data(rows)
+    
+    # 変換データをS3に保存
+    s3_key = 'transformed_data.json'
+    s3_client.put_object(Bucket='your-s3-bucket', Key=s3_key, Body=transformed_data)
+    
+    # SNS通知の送信
+    message = f"ETL処理が完了しました。変換データは {s3_key} に保存されました。"
+    sns_client.publish(TopicArn=sns_topic_arn, Message=message)
+    
+    # 接続を閉じる
+    conn.close()
+
+def transform_data(rows):
+    # データ変換ロジック
+    return json.dumps(rows)
+
+# テスト用にLambda関数を呼び出す場合
+if __name__ == "__main__":
+    lambda_handler({}, {})

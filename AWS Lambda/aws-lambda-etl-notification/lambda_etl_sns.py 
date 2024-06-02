@@ -1,0 +1,47 @@
+import boto3
+import pymysql
+import json
+
+# S3クライアントの設定
+s3_client = boto3.client('s3')
+
+# RDSの接続情報
+rds_host = 'your-rds-endpoint'
+rds_user = 'your-username'
+rds_password = 'your-password'
+rds_db = 'your-database'
+
+# SNSクライアントの設定
+sns_client = boto3.client('sns')
+sns_topic_arn = 'your-sns-topic-arn'
+
+def lambda_handler(event, context):
+    # RDSに接続
+    conn = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
+    cursor = conn.cursor()
+    
+    # データの抽出
+    cursor.execute("SELECT * FROM your_table")
+    rows = cursor.fetchall()
+    
+    # データの変換処理
+    transformed_data = transform_data(rows)
+    
+    # 変換データをS3に保存
+    s3_key = 'transformed_data.json'
+    s3_client.put_object(Bucket='your-s3-bucket', Key=s3_key, Body=transformed_data)
+    
+    # SNS通知の送信
+    message = f"ETL処理が完了しました。変換データは {s3_key} に保存されました。"
+    sns_client.publish(TopicArn=sns_topic_arn, Message=message)
+    
+    # 接続を閉じる
+    conn.close()
+
+def transform_data(rows):
+    # データ変換ロジック
+    return json.dumps(rows)
+
+# テスト用にLambda関数を呼び出す場合
+if __name__ == "__main__":
+    lambda_handler({}, {})
