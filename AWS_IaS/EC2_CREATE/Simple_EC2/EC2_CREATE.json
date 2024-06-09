@@ -1,0 +1,80 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "An EC2 instance with Apache installation, user creation, KMS, EBS, private IP, and subnet using an existing security group",
+  "Parameters": {
+    "InstanceType": {
+      "Description": "WebServer EC2 instance type",
+      "Type": "String",
+      "Default": "t2.small",
+      "ConstraintDescription": "must be a valid EC2 instance type."
+      },
+    "ImageId": {
+       "Description": "WebServer EC2 instance type",
+       "Type": "String",
+       "Default": "ami-064d2a8f528240c59"
+       },
+    "SecurityGroupId": {
+      "Description": "ID of an existing Security Group",
+      "Type": "AWS::EC2::SecurityGroup::Id",
+      "AllowedPattern": "sg-[a-zA-Z0-9]+",
+      "ConstraintDescription": "Must be a valid security group ID."
+    },
+    "SubnetId": {
+      "Description": "The subnet ID where the instance will be deployed",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PrivateIpAddress": {
+      "Description": " The IP address range that can be used to SSH to the EC2 instances",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    },
+    "KeyName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "EbsVolumeSize": {
+      "Description": "The size of the EBS volume in GB",
+      "Type": "Number",
+      "Default": 20,
+      "MinValue": 1,
+      "MaxValue": 16384
+    }
+  },
+  "Resources": {
+    "MyEC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "InstanceType",
+        "KeyName": "KeyName",
+        "AMI": "ImageId",
+        "SubnetId": {
+          "Ref": "SubnetId"
+        },
+        "PrivateIpAddress": {
+          "Ref": "PrivateIpAddress"
+        },
+        "SecurityGroupIds": {
+          
+            "Ref": "SecurityGroupId"
+          
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": {
+                "Ref": "EbsVolumeSize"
+              },
+              "VolumeType": "gp2",
+              "Encrypted": true
+            }
+          }
+        ]
+      }
+    }
+  }
+}
