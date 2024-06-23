@@ -1,0 +1,700 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template to create an EC2 instance and RDS integration, including database initialization.",
+    "Parameters": {
+      "VPC": {
+        "Type": "AWS::EC2::VPC::Id",
+        "Description": "The VPC ID for the resources."
+      },
+      "SubnetId": {
+        "Type": "AWS::EC2::Subnet::Id",
+        "Description": "The subnet ID for the EC2 instance."
+      },
+      "KeyName": {
+        "Type": "AWS::EC2::KeyPair::KeyName",
+        "Description": "The EC2 Key Pair to allow SSH access to the instance."
+      },
+      "SecurityGroupId": {
+        "Type": "AWS::EC2::SecurityGroup::Id",
+        "Description": "ID of an existing Security Group",
+        "AllowedPattern": "sg-[a-zA-Z0-9]+",
+        "ConstraintDescription": "Must be a valid security group ID."
+      },
+      "InstanceType": {
+        "Type": "String",
+        "Default": "t2.micro",
+        "Description": "EC2 instance type",
+        "AllowedValues": [
+          "t1.micro",
+          "t2.nano",
+          "t2.micro",
+          "t2.small",
+          "t2.medium",
+          "t2.large",
+          "m1.small",
+          "m1.medium",
+          "m1.large",
+          "m1.xlarge",
+          "m2.xlarge",
+          "m2.2xlarge",
+          "m2.4xlarge",
+          "m3.medium",
+          "m3.large",
+          "m3.xlarge",
+          "m3.2xlarge",
+          "m4.large",
+          "m4.xlarge",
+          "m4.2xlarge",
+          "m4.4xlarge",
+          "m4.10xlarge",
+          "c1.medium",
+          "c1.xlarge",
+          "c3.large",
+          "c3.xlarge",
+          "c3.2xlarge",
+          "c3.4xlarge",
+          "c3.8xlarge",
+          "c4.large",
+          "c4.xlarge",
+          "c4.2xlarge",
+          "c4.4xlarge",
+          "c4.8xlarge",
+          "g2.2xlarge",
+          "g2.8xlarge",
+          "r3.large",
+          "r3.xlarge",
+          "r3.2xlarge",
+          "r3.4xlarge",
+          "r3.8xlarge",
+          "i2.xlarge",
+          "i2.2xlarge",
+          "i2.4xlarge",
+          "i2.8xlarge",
+          "d2.xlarge",
+          "d2.2xlarge",
+          "d2.4xlarge",
+          "d2.8xlarge",
+          "hi1.4xlarge",
+          "hs1.8xlarge",
+          "cr1.8xlarge",
+          "cc2.8xlarge",
+          "cg1.4xlarge"
+        ],
+        "ConstraintDescription": "Must be a valid EC2 instance type."
+      },
+      "VolumeSize": {
+        "Type": "Number",
+        "Default": 10,
+        "MinValue": 1,
+        "MaxValue": 30,
+        "Description": "Size of the EBS volume in GiB."
+      },
+      "VolumeType": {
+        "Type": "String",
+        "Default": "gp2",
+        "AllowedValues": [
+          "gp2",
+          "io1",
+          "sc1",
+          "st1",
+          "standard"
+        ],
+        "Description": "Type of the EBS volume."
+      },
+      "DBInstanceIdentifier": {
+        "Type": "String",
+        "Description": "The database instance identifier."
+      },
+      "AllocatedStorage": {
+        "Type": "Number",
+        "Default": 20,
+        "Description": "The size of the database (GB)."
+      },
+      "DBInstanceClass": {
+        "Type": "String",
+        "Description": "The compute and memory capacity of the DB instance.",
+        "AllowedValues": [
+          "db.t3.micro",
+          "db.t3.small",
+          "db.t3.medium",
+          "db.m5.large",
+          "db.m5.xlarge"
+        ],
+        "Default": "db.t3.micro"
+      },
+      "Engine": {
+        "Type": "String",
+        "Description": "The database engine to use.",
+        "AllowedValues": [
+          "mysql",
+          "postgres",
+          "oracle-se2",
+          "sqlserver-ex",
+          "mariadb",
+          "aurora-mysql",
+          "aurora-postgresql"
+        ],
+        "Default": "mysql"
+      },
+      "MasterUsername": {
+        "Type": "String",
+        "Description": "The master username for the database."
+      },
+      "MasterUserPassword": {
+        "Type": "String",
+        "NoEcho": true,
+        "Description": "The master password for the database."
+      },
+      "DBName": {
+        "Type": "String",
+        "Description": "The name of the database."
+      },
+      "BackupRetentionPeriod": {
+        "Type": "Number",
+        "Default": 7,
+        "Description": "The number of days to retain backups."
+      },
+      "MultiAZ": {
+        "Type": "String",
+        "Description": "Specifies if the database instance is a Multi-AZ deployment.",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Default": "false"
+      },
+      "StorageType": {
+        "Type": "String",
+        "Description": "The storage type to be associated with the DB instance.",
+        "AllowedValues": [
+          "standard",
+          "gp2",
+          "io1"
+        ],
+        "Default": "gp2"
+      },
+      "EngineVersion": {
+        "Type": "String",
+        "Description": "The version of the database engine."
+      },
+      "AutoMinorVersionUpgrade": {
+        "Type": "String",
+        "Description": "Indicates that minor engine upgrades are applied automatically.",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Default": "true"
+      },
+      "PubliclyAccessible": {
+        "Type": "String",
+        "Description": "Indicates whether the DB instance is publicly accessible.",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Default": "false"
+      },
+      "SubnetA": {
+        "Type": "AWS::EC2::Subnet::Id",
+        "Description": "Subnet ID for the RDS instance."
+      },
+      "SubnetB": {
+        "Type": "AWS::EC2::Subnet::Id",
+        "Description": "Another Subnet ID for the RDS instance."
+      }
+    },
+    "Resources": {
+      "MyEC2Instance": {
+        "Type": "AWS::EC2::Instance",
+        "Properties": {
+          "InstanceType": {
+            "Ref": "InstanceType"
+          },
+          "KeyName": {
+            "Ref": "KeyName"
+          },
+          "ImageId": {
+            "Fn::FindInMap": [
+              "AWSRegionArch2AMI",
+              {
+                "Ref": "AWS::Region"
+              },
+              {
+                "Fn::FindInMap": [
+                  "AWSInstanceType2Arch",
+                  {
+                    "Ref": "InstanceType"
+                  },
+                  "Arch"
+                ]
+              }
+            ]
+          },
+          "SubnetId": {
+            "Ref": "SubnetId"
+          },
+          "SecurityGroupIds": [
+            {
+              "Ref": "SecurityGroupId"
+            }
+          ],
+          "BlockDeviceMappings": [
+            {
+              "DeviceName": "/dev/sda1",
+              "Ebs": {
+                "VolumeSize": {
+                  "Ref": "VolumeSize"
+                },
+                "VolumeType": {
+                  "Ref": "VolumeType"
+                },
+                "DeleteOnTermination": true
+              }
+            }
+          ],
+          "UserData": {
+            "Fn::Base64": {
+              "Fn::Join": [
+                "",
+                [
+                  "#!/bin/bash\n",
+                  "yum install -y mysql\n",
+                  "DB_ENDPOINT=",
+                  {
+                    "Fn::GetAtt": [
+                      "MyRDSInstance",
+                      "Endpoint.Address"
+                    ]
+                  },
+                  "\n",
+                  "DB_USER=",
+                  {
+                    "Ref": "MasterUsername"
+                  },
+                  "\n",
+                  "DB_PASS=",
+                  {
+                    "Ref": "MasterUserPassword"
+                  },
+                  "\n",
+                  "DB_NAME=",
+                  {
+                    "Ref": "DBName"
+                  },
+                  "\n",
+                  "while ! mysqladmin ping -h$DB_ENDPOINT --silent; do\n",
+                  "  sleep 1\n",
+                  "done\n",
+                  "mysql -h $DB_ENDPOINT -u $DB_USER -p$DB_PASS $DB_NAME <<EOF\n",
+                  "CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY (id));\n",
+                  "INSERT INTO users (name) VALUES ('John Doe');\n",
+                  "EOF\n" ]
+              ]
+            }
+          }
+        }
+      },
+      "MyRDSInstance": {
+        "Type": "AWS::RDS::DBInstance",
+        "Properties":
+        {
+            "DBInstanceIdentifier": {
+              "Ref": "DBInstanceIdentifier"
+            },
+            "AllocatedStorage": {
+              "Ref": "AllocatedStorage"
+            },
+            "DBInstanceClass": {
+              "Ref": "DBInstanceClass"
+            },
+            "Engine": {
+              "Ref": "Engine"
+            },
+            "MasterUsername": {
+              "Ref": "MasterUsername"
+            },
+            "MasterUserPassword": {
+              "Ref": "MasterUserPassword"
+            },
+            "DBName": {
+              "Ref": "DBName"
+            },
+            "VPCSecurityGroups": [
+              {
+                "Ref": "MyDBSecurityGroup"
+              }
+            ],
+            "BackupRetentionPeriod": {
+              "Ref": "BackupRetentionPeriod"
+            },
+            "DBParameterGroupName": {
+              "Ref": "MyDBParameterGroup"
+            },
+            "MultiAZ": {
+              "Ref": "MultiAZ"
+            },
+            "StorageType": {
+              "Ref": "StorageType"
+            },
+            "EngineVersion": {
+              "Ref": "EngineVersion"
+            },
+            "AutoMinorVersionUpgrade": {
+              "Ref": "AutoMinorVersionUpgrade"
+            },
+            "PubliclyAccessible": {
+              "Ref": "PubliclyAccessible"
+            },
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "MyRDSInstance"
+              }
+            ],
+            "DBSubnetGroupName": {
+              "Ref": "MyDBSubnetGroup"
+            },
+            "PreferredBackupWindow": "07:00-09:00",
+            "PreferredMaintenanceWindow": "Mon:00:00-Mon:03:00",
+            "StorageEncrypted": true,
+            "CopyTagsToSnapshot": true,
+            "DeletionProtection": false,
+            "EnableIAMDatabaseAuthentication": true
+          }
+        },
+        "MyDBParameterGroup": {
+          "Type": "AWS::RDS::DBParameterGroup",
+          "Properties": {
+            "Description": "Parameter group for my DB instance",
+            "Family": "mysql8.0",
+            "Parameters": {
+              "max_allowed_packet": "16777216",
+              "slow_query_log": "1",
+              "long_query_time": "10",
+              "character_set_server": "utf8mb4",
+              "innodb_buffer_pool_size": "268435456"
+            }
+          }
+        },
+        "MyDBSecurityGroup": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription": "Enable access to my RDS instance",
+            "VpcId": {
+              "Ref": "VPC"
+            },
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": "3306",
+                "ToPort": "3306",
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "MyDBSubnetGroup": {
+          "Type": "AWS::RDS::DBSubnetGroup",
+          "Properties": {
+            "DBSubnetGroupDescription": "Subnet group for my RDS instance",
+            "SubnetIds": [
+              {
+                "Ref": "SubnetA"
+              },
+              {
+                "Ref": "SubnetB"
+              }
+            ]
+          }
+        }
+      },
+      "Mappings": {
+        "AWSInstanceType2Arch": {
+          "c1.medium": {
+            "Arch": "HVM64"
+          },
+          "c1.xlarge": {
+            "Arch": "HVM64"
+          },
+          "c3.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "c3.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "c3.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "c3.large": {
+            "Arch": "HVM64"
+          },
+          "c3.xlarge": {
+            "Arch": "HVM64"
+          },
+          "c4.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "c4.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "c4.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "c4.large": {
+            "Arch": "HVM64"
+          },
+          "c4.xlarge": {
+            "Arch": "HVM64"
+          },
+          "cc2.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "cr1.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "d2.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "d2.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "d2.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "d2.xlarge": {
+            "Arch": "HVM64"
+          },
+          "g2.2xlarge": {
+            "Arch": "HVMG2"
+          },
+          "g2.8xlarge": {
+            "Arch": "HVMG2"
+          },
+          "hi1.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "hs1.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "i2.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "i2.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "i2.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "i2.xlarge": {
+            "Arch": "HVM64"
+          },
+          "m1.large": {
+            "Arch": "HVM64"
+          },
+          "m1.medium": {
+            "Arch": "HVM64"
+          },
+          "m1.small": {
+            "Arch": "HVM64"
+          },
+          "m1.xlarge": {
+            "Arch": "HVM64"
+          },
+          "m2.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "m2.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "m2.xlarge": {
+            "Arch": "HVM64"
+          },
+          "m3.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "m3.large": {
+            "Arch": "HVM64"
+          },
+          "m3.medium": {
+            "Arch": "HVM64"
+          },
+          "m3.xlarge": {
+            "Arch": "HVM64"
+          },
+          "m4.10xlarge": {
+            "Arch": "HVM64"
+          },
+          "m4.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "m4.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "m4.large": {
+            "Arch": "HVM64"
+          },
+          "m4.xlarge": {
+            "Arch": "HVM64"
+          },
+          "r3.2xlarge": {
+            "Arch": "HVM64"
+          },
+          "r3.4xlarge": {
+            "Arch": "HVM64"
+          },
+          "r3.8xlarge": {
+            "Arch": "HVM64"
+          },
+          "r3.large": {
+            "Arch": "HVM64"
+          },
+          "r3.xlarge": {
+            "Arch": "HVM64"
+          },
+          "t1.micro": {
+            "Arch": "HVM64"
+          },
+          "t2.large": {
+            "Arch": "HVM64"
+          },
+          "t2.medium": {
+            "Arch": "HVM64"
+          },
+          "t2.micro": {
+            "Arch": "HVM64"
+          },
+          "t2.nano": {
+            "Arch": "HVM64"
+          },
+          "t2.small": {
+            "Arch": "HVM64"
+          }
+        },
+        "AWSRegionArch2AMI": {
+          "af-south-1": {
+            "HVM64": "ami-0412806bd0f2cf75f",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-east-1": {
+            "HVM64": "ami-0e0a21f8bd5195698",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-northeast-1": {
+            "HVM64": "ami-0c3e3e7af817ad732",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-northeast-2": {
+            "HVM64": "ami-0f8dbbf156e3a5cc6",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-northeast-3": {
+            "HVM64": "ami-02a371c41f08cc499",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-south-1": {
+            "HVM64": "ami-0f4ab3c8db917e421",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-south-2": {
+            "HVM64": "ami-008",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-southeast-1": {
+            "HVM64": "ami-0c3189395e5b39df7",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-southeast-2": {
+            "HVM64": "ami-040d698318c0b1575",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-southeast-3": {
+            "HVM64": "ami-065dcca47dde26602",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ap-southeast-4": {
+            "HVM64": "ami-043e25432cf94e107",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "il-central-1": {
+            "HVM64": "ami-0054be7d7d9d65a1d",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "ca-central-1": {
+            "HVM64": "ami-05f40104305a2cdf7",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "cn-north-1": {
+            "HVM64": "ami-03f1e08d409b1e5fd",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "cn-northwest-1": {
+            "HVM64": "ami-00093746b9a0e272a",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-central-1": {
+            "HVM64": "ami-0f454ec961da9a046",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-north-1": {
+            "HVM64": "ami-0e78cd18c67fcf512",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-south-1": {
+            "HVM64": "ami-07d048788725b9602",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-west-1": {
+            "HVM64": "ami-0db5ca3e5748fb7e2",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-west-2": {
+            "HVM64": "ami-07baf6b15b7387f24",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-west-3": {
+            "HVM64": "ami-05a13fbd8aa57eedc",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "me-south-1": {
+            "HVM64": "ami-0007de3fdcaba7e44",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "me-central-1": {
+            "HVM64": "ami-06ce88defa3fc74ed",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-south-2": {
+            "HVM64": "ami-051306f4e885d6de4",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "eu-central-2": {
+            "HVM64": "ami-0fcd532574732cb0f",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "sa-east-1": {
+            "HVM64": "ami-07f6e9fce0e888425",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "us-east-1": {
+            "HVM64": "ami-01989ebfd388ea377",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "us-east-2": {
+            "HVM64": "ami-0de69dde1945155da",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "us-west-1": {
+            "HVM64": "ami-08fe20a82dcaa1c92",
+            "HVMG2": "NOT_SUPPORTED"
+          },
+          "us-west-2": {
+            "HVM64": "ami-05848d23360f5edfe",
+            "HVMG2": "NOT_SUPPORTED"
+          }
+        }
+      }
+    }
+    
+    
+  
