@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  web:
+    build: 
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/myapp
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - db
+      - cache
+    volumes:
+      - ./web:/app
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  cache:
+    image: redis:6
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  worker:
+    build: 
+      context: ./worker
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/myapp
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - db
+      - cache
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  postgres_data:
+  redis_data:
