@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>株の購入タイミング判定アプリ</title>
+    <style>
+        body {
+            background-color: #FFFAF0;
+        }
+        .graph-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+        .graph-container div {
+            text-align: center;
+        }
+        .graph-container img {
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+        table {
+            margin: 20px 0;
+            border-collapse: collapse;
+            width: 50%;
+        }
+        table, th, td {
+            border: 1px solid #666;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>株の購入タイミング判定</h1>
+    <form method="post">
+        <label for="code">銘柄コードを入力してください（4桁の数字）:</label>
+        <input type="text" id="code" name="code" required>
+        <button type="submit">判定</button>
+    </form>
+
+    {% if signal %}
+        <h2>{{ name }}（{{ code }}）のシグナル: {{ signal }}</h2>
+        <p>現在価格: <span id="current-price">{{ current_price }} 円</span></p>
+        <!-- 予測される近々の価格の表示を削除 -->
+        <p><strong>{{ year }}年</strong></p>
+
+        <!-- 平均株価を表形式で表示 -->
+        <h3>平均株価の比較</h3>
+        <table>
+            <tr>
+                <th>期間</th>
+                <th>平均株価（円）</th>
+            </tr>
+            <tr>
+                <td>過去1ヶ月</td>
+                <td>{{ avg_price_1mo }}</td>
+            </tr>
+            <tr>
+                <td>過去6ヶ月</td>
+                <td>{{ avg_price_6mo }}</td>
+            </tr>
+            <tr>
+                <td>過去1年</td>
+                <td>{{ avg_price_1y }}</td>
+            </tr>
+        </table>
+
+        <!-- グラフの表示 -->
+        <h3>株価推移の比較</h3>
+        <div class="graph-container">
+            {% for period_name in ['1ヶ月', '6ヶ月', '1年'] %}
+            <div>
+                <h4>{{ period_name }}</h4>
+                <img src="data:image/png;base64,{{ graph_urls[period_name] }}" alt="{{ period_name }}の株価グラフ">
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ティッカーシンボルを隠しフィールドに格納 -->
+        <input type="hidden" id="ticker" value="{{ ticker }}">
+    {% endif %}
+
+    {% if signal == None %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+
+    <!-- JavaScriptで5秒ごとに現在価格を更新 -->
+    <script>
+        {% if signal %}
+        setInterval(function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/get_current_price', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const response = JSON.parse(this.responseText);
+                    document.getElementById('current-price').textContent = response.current_price + ' 円';
+                }
+            };
+            const ticker = document.getElementById('ticker').value;
+            xhr.send('ticker=' + encodeURIComponent(ticker));
+        }, 5000);
+        {% endif %}
+    </script>
+</body>
+</html>
