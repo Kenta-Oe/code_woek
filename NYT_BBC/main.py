@@ -1,16 +1,20 @@
 import feedparser
 import openai
-import requests
-import os
+import tweepy
+import time
 from datetime import datetime, timedelta
-
-# 環境変数から設定を取得
-NYT_RSS_URL = "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+from config import *
 
 # OpenAI APIキーを設定
 openai.api_key = OPENAI_API_KEY
+
+# X API クライアントの初期化
+x_client = tweepy.Client(
+    consumer_key=X_API_KEY,
+    consumer_secret=X_API_SECRET,
+    access_token=X_ACCESS_TOKEN,
+    access_token_secret=X_ACCESS_TOKEN_SECRET
+)
 
 def fetch_nyt_articles():
     """NYTのRSSフィードを取得して、前日の記事を抽出"""
@@ -51,7 +55,7 @@ def translate_article(content):
                 {"role": "system", "content": "あなたは翻訳が得意なアシスタントです。"},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=600,  # トークン制限を倍に
+            max_tokens=600,
             temperature=0.7,
         )
         translated_text = response.choices[0].message["content"].strip()
@@ -61,36 +65,44 @@ def translate_article(content):
         print(f"Error during translation: {e}")
         return "翻訳に失敗しました。"
 
-def post_to_slack(message):
-    """Slackに通知"""
-    print("Posting to Slack...")
-    payload = {"text": message}
-    response = requests.post(SLACK_WEBHOOK_URL, json=payload)
-    if response.status_code == 200:
-        print("Message posted to Slack.")
-    else:
-        print(f"Error posting to Slack: {response.status_code}, Response: {response.text}")
+def post_to_x(message):
+    """Xにメッセージを投稿"""
+    try:
+        result = x_client.create_tweet(text=message)
+        print(f"Successfully posted to X: {message}")
+        return True
+    except Exception as e:
+        print(f"Error posting to X: {e}")
+        return False
 
 def main():
-    """記事取得、翻訳、Slack通知を実行"""
+    """記事取得、翻訳、X投稿を実行"""
     articles = fetch_nyt_articles()
     if not articles:
         print("No articles found for yesterday.")
-        post_to_slack("昨日の記事が見つかりませんでした。")
         return
 
-    messages = []
+    # すべての記事の翻訳をまとめて行う
+    translated_articles = []
     for article in articles:
         print(f"\nTitle: {article['title']}")
         print(f"Link: {article['link']}")
         print("Original Summary:", article['summary'])
+        
         translated_summary = translate_article(article['summary'])
-        message = f"*{article['title']}*\n{translated_summary}\n<{article['link']}>"
-        messages.append(message)
+        translated_articles.append({
+            "title": article['title'],
+            "summary": translated_summary,
+            "link": article['link']
+        })
 
-    # Slackに投稿
-    final_message = "\n\n".join(messages)
-    post_to_slack(final_message)
+    # まとめた記事を1つのメッセージにする
+    message = "New York Timesの昨日の記事一覧\n\n"
+    for article in translated_articles:
+        message += f"{article['title']}\n{article['summary']}\n{article['link']}\n\n"
+
+    # まとめたメッセージを投稿
+    post_to_x(message)
     print("Process completed successfully.")
 
 if __name__ == "__main__":
