@@ -1,84 +1,88 @@
-# AWS News Tracker
+# AWS News Summary Generator
 
-AWSの新着ニュースを自動で収集し、GPT-4で要約してExcelファイルに整理するPythonスクリプト
+AWSに関連するニュースをRSSフィードから取得し、サービスごとにExcelファイルにまとめるツールです。
 
 ## 機能
 
-- AWS What's Newのフィードから最新ニュースを自動取得
-- GPT-4を使用して記事内容を簡潔に要約
-- AWSサービスごとにExcelファイルを作成して整理
-- 既に処理済みの記事を管理し重複を防止
-- 30日以上経過した古い記事履歴の自動クリーンアップ
+- 複数のRSSフィードからAWS関連ニュースを取得
+  - AWS 公式の新着情報（What's New）
+  - Developers.IO のAWS関連記事
+  - AWS Machine Learning ブログ
+  - AWS 日本語ブログ
+- サービスごとにカテゴリ分類
+- GPT-4による記事要約
+- 記事の重複取得を防止
+- サービスごとにExcelファイルへの自動出力
+- 30日以上前の古い記事履歴の自動クリーンアップ
+- 処理結果の詳細なログ表示
 
-## セットアップ
+## 必要な環境変数
 
-1. リポジトリをクローン:
-```bash
-git clone https://github.com/Kenta-Oe/code_woek.git
-cd code_woek/my_aws_news
-```
+`.env`ファイルに以下の環境変数を設定してください：
 
-2. 必要なパッケージをインストール:
-```bash
-pip install -r requirements.txt
-```
-
-3. `.env`ファイルを作成し、以下の環境変数を設定:
 ```
 OPENAI_API_KEY=your_openai_api_key
 AWS_NEWS_RSS=https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/
+DEVELOPERS_IO_RSS=https://developers.io/category/aws/feed/
+AWS_ML_BLOG_RSS=https://aws.amazon.com/blogs/machine-learning/feed/
+AWS_JP_BLOG_RSS=https://aws.amazon.com/jp/blogs/news/feed/
 ```
 
 ## 使用方法
 
-スクリプトを実行:
-```bash
-python main.py
-```
+1. 必要なパッケージをインストール：
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-実行すると以下の処理が行われます:
-- AWSの新着ニュースフィードを取得
-- 記事タイトルからAWSサービスを判別
-- GPT-4で記事内容を要約
-- サービスごとのExcelファイルに記事情報を保存
+2. `.env`ファイルを作成し、必要な環境変数を設定
 
-## ファイル構成
+3. スクリプトを実行：
+   ```bash
+   python main.py
+   ```
 
-- `main.py`: メインスクリプト
-- `article_manager.py`: 記事の処理状態を管理するクラス
-- `service_classifier.py`: AWSサービス名を判別する機能
-- `service_list.txt`: AWSサービス名のリスト
-- `requirements.txt`: 必要なPythonパッケージ
-- `.gitignore`: Git管理から除外するファイル設定
+4. デスクトップの`aws_news_summary`フォルダに結果が出力されます
 
-## 出力ファイル
+## 出力形式
 
-デフォルトでは`~/OneDrive/デスクトップ/aws_news_summary/`以下に以下のような構造で出力されます:
-```
-aws_news_summary/
-├── Amazon EC2/
-│   └── Amazon EC2.xlsx
-├── Amazon S3/
-│   └── Amazon S3.xlsx
-├── Other/
-│   └── Other.xlsx
-└── processed_articles.json
-```
+- サービスごとにフォルダが作成されます
+- 各フォルダ内にExcelファイルが生成されます
+- Excelファイルには以下の情報が含まれます：
+  - 日付
+  - タイトル
+  - 要約
+  - 記事リンク
 
-各Excelファイルには以下の情報が含まれます:
-- 日付
-- タイトル
-- 要約
-- リンク
+## ログ出力
 
-## 依存パッケージ
+- 取得開始時に読み込まれたサービス数を表示
+- 各RSSフィードごとの処理状況を表示
+  - フィード内の総記事数
+  - 新規に取得された記事数
+  - スキップされた記事数（重複）
+- 最後に全体の新規記事数を表示
 
-- feedparser==6.0.10
-- openai==1.3.0
-- requests==2.31.0
-- python-dotenv==1.0.0
-- openpyxl==3.1.2
+## 処理の流れ
 
-## ライセンス
+1. 環境変数とサービスリストの読み込み
+2. 古い記事履歴のクリーンアップ（30日以上前）
+3. 各RSSフィードに対して：
+   - フィードの取得と解析
+   - 各記事に対して：
+     - 重複チェック
+     - サービス名の検出
+     - 要約生成（GPT-4使用）
+     - Excelファイルへの保存
+4. 処理結果のサマリー表示
 
-このプロジェクトはMITライセンスの下で公開されています。
+## 更新履歴
+
+### 2024-01-18
+- 複数のRSSフィードに対応
+  - Developers.IO
+  - AWS Machine Learning ブログ
+  - AWS 日本語ブログ
+  を追加
+- フィードごとの処理結果の詳細表示を追加
+- 記事取得時のエラーハンドリングを強化
