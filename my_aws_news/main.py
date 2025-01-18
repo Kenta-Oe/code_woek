@@ -12,7 +12,14 @@ from article_manager import ArticleManager
 # 環境変数の読み込み
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AWS_NEWS_RSS = os.getenv("AWS_NEWS_RSS", "https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/")
+
+# 複数のRSSフィードを定義
+RSS_FEEDS = [
+    os.getenv("AWS_NEWS_RSS", "https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/"),
+    os.getenv("DEVELOPERS_IO_RSS", "https://developers.io/category/aws/feed/"),
+    os.getenv("AWS_ML_BLOG_RSS", "https://aws.amazon.com/blogs/machine-learning/feed/"),
+    os.getenv("AWS_JP_BLOG_RSS", "https://aws.amazon.com/jp/blogs/news/feed/")
+]
 
 # 出力先のベースディレクトリを設定
 BASE_OUTPUT_DIR = os.path.expanduser("~/OneDrive/デスクトップ/aws_news_summary")
@@ -77,53 +84,60 @@ def main():
     # 古い記事履歴のクリーンアップ
     article_manager.cleanup_old_entries()
 
-    # RSSフィードを取得
-    print("\nRSSフィードを取得中...")
-    feed = feedparser.parse(AWS_NEWS_RSS)
-    
-    # 新規記事カウント
-    new_articles_count = 0
+    # 合計の新規記事カウント
+    total_new_articles = 0
 
-    # 各記事を処理
-    for entry in feed.entries:
-        title = entry.title
-        link = entry.link
-        summary = entry.summary
-        date = datetime.now().strftime("%Y-%m-%d")
+    # 各RSSフィードを処理
+    for feed_url in RSS_FEEDS:
+        print(f"\nRSSフィード {feed_url} を取得中...")
+        feed = feedparser.parse(feed_url)
+        new_articles_count = 0
         
-        # 記事IDを生成（URLを使用）
-        article_id = link
-        
-        # 既に処理済みの記事はスキップ
-        if article_manager.is_article_processed(article_id, link):
-            print(f"スキップ（既存）: {title}")
-            continue
-        
-        print(f"\n処理中の記事タイトル: {title}")
-        new_articles_count += 1
-        
-        # サービス名を検出
-        service_name = find_service_for_article(services, title)
-        if service_name == "Other":
-            print("→ サービス名が一致しませんでした")
-        
-        # Excelファイルを取得または作成
-        wb, excel_path = create_or_get_excel(service_name)
-        
-        # 要約を生成
-        summarized_text = summarize_with_gpt(summary)
-        
-        # エントリーを追加と保存
-        try:
-            add_entry_to_excel(wb, date, title, summarized_text, link)
-            wb.save(excel_path)
-            # 処理済みとしてマーク
-            article_manager.mark_article_as_processed(article_id, link, title)
-            print(f"→ {service_name}/{service_name}.xlsxに保存完了")
-        except Exception as e:
-            print(f"Excelファイルの保存中にエラー: {e}")
+        print(f"フィード内の記事数: {len(feed.entries)}")  # デバッグ用
 
-    print(f"\n処理完了: 新規記事 {new_articles_count} 件")
+        # 各記事を処理
+        for entry in feed.entries:
+            title = entry.title
+            link = entry.link
+            summary = entry.summary if hasattr(entry, 'summary') else entry.get('description', '')
+            date = datetime.now().strftime("%Y-%m-%d")
+            
+            # 記事IDを生成（URLを使用）
+            article_id = link
+            
+            # 既に処理済みの記事はスキップ
+            if article_manager.is_article_processed(article_id, link):
+                print(f"スキップ（既存）: {title}")
+                continue
+            
+            print(f"\n処理中の記事タイトル: {title}")
+            new_articles_count += 1
+            
+            # サービス名を検出
+            service_name = find_service_for_article(services, title)
+            if service_name == "Other":
+                print("→ サービス名が一致しませんでした")
+            
+            # Excelファイルを取得または作成
+            wb, excel_path = create_or_get_excel(service_name)
+            
+            # 要約を生成
+            summarized_text = summarize_with_gpt(summary)
+            
+            # エントリーを追加と保存
+            try:
+                add_entry_to_excel(wb, date, title, summarized_text, link)
+                wb.save(excel_path)
+                # 処理済みとしてマーク
+                article_manager.mark_article_as_processed(article_id, link, title)
+                print(f"→ {service_name}/{service_name}.xlsxに保存完了")
+            except Exception as e:
+                print(f"Excelファイルの保存中にエラー: {e}")
+
+        print(f"フィード {feed_url} の処理完了: 新規記事 {new_articles_count} 件")
+        total_new_articles += new_articles_count
+
+    print(f"\n全体の処理完了: 合計新規記事 {total_new_articles} 件")
 
 if __name__ == "__main__":
     main()
