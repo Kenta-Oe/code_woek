@@ -87,7 +87,7 @@ function saveDailySummaryToDrive(fileName, content) {
 
 function sendSummaryEmail(fileName, content) {
   Logger.log('メール送信関数開始');
-  const emailAddress = 'takkyuuomoro@gmail.com';
+  const emailAddress = 'your_mail';
   const subject = `NYTニュース要約 - ${fileName}`;
   
   try {
