@@ -1,0 +1,12 @@
+{
+    "title": "AWS Q ポッドキャスト",
+    "description": "AWS Qの詳細解説",
+    "reference": "AWS Q ドキュメント",
+    "script": [
+        {
+            "text": "これはサンプルポッドキャストスクリプトです。",
+            "speaker": "ナレーター",
+            "speed": 1.0
+        }
+    ]
+}
