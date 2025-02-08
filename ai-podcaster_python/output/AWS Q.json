@@ -1,0 +1,12 @@
+{
+    "title": "AWS Q概要",
+    "description": "AWS Qの基本機能と利用方法の説明",
+    "reference": "AWS Q documentation",
+    "script": [
+        {
+            "text": "これはサンプルのAWS Q説明スクリプトです。",
+            "speaker": "ナレーター",
+            "speed": 1.0
+        }
+    ]
+}
