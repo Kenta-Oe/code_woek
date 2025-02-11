@@ -1,0 +1,139 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #FFF8F0;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1, h2 {
+    color: #FF6B1A;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 2px solid #FFA562;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 200px;
+}
+
+.btn {
+    background-color: #FF6B1A;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #FF8C42;
+}
+
+.add-url-btn {
+    background-color: #4CAF50;
+}
+
+.add-url-btn:hover {
+    background-color: #45a049;
+}
+
+pre {
+    background-color: #FFE4CC;
+    padding: 15px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #FFA562;
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.flash-messages {
+    margin: 20px 0;
+}
+
+.flash-message {
+    color: #FF4500;
+    padding: 10px;
+    background-color: #FFE4CC;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.url-inputs {
+    margin-bottom: 20px;
+}
+
+.url-input {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.url-input input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.historical-scripts {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #FFE4CC;
+    border-radius: 4px;
+}
+
+.script-info {
+    background-color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.script-title {
+    font-weight: bold;
+    color: #FF6B1A;
+}
+
+.word-count {
+    color: #666;
+    font-size: 0.9em;
+    margin: 10px 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.current-script {
+    margin-top: 30px;
+}
+
+.summary-section {
+    margin-top: 30px;
+}
+
+.summary-box {
+    background-color: #FFF3E0;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #FFB74D;
+    margin-top: 10px;
+    line-height: 1.6;
+}
