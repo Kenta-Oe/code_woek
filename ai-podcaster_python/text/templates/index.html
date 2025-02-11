@@ -6,176 +6,66 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Podcast 台本生成ツール</h1>
-    <form method="post" action="{{ url_for('generate_script_route') }}">
-        <label for="title">タイトル:</label><br>
-        <input type="text" id="title" name="title" required><br><br>
-
-        <label for="input_text">入力テキスト（参考情報等）:</label><br>
-        <textarea id="input_text" name="input_text" rows="10" cols="80">{{ input_text }}</textarea><br><br>
-        
-        <div class="url-inputs" id="urlInputs">
-            <label>参考元URL（複数可）:</label><br>
-            {% if urls %}
-                {% for url in urls %}
-                    <div class="url-input">
-                        <input type="text" name="urls[]" value="{{ url }}">
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="url-input">
-                    <input type="text" name="urls[]" value="">
-                </div>
-            {% endif %}
-        </div>
-        <button type="button" class="btn add-url-btn" onclick="addUrlInput()">URLを追加</button><br><br>
-        
-        <button type="submit" class="btn">台本生成</button>
-    </form>
-
-    {% if script_text %}
-    <div class="current-script">
-        <h2>生成された台本</h2>
-        <div class="word-count">文字数: {{ character_count }}</div>
-        <div class="button-group">
-            <button class="btn" onclick="createJson()">JSONコード作成</button>
-            <button class="btn" onclick="generateMp3()">MP3に出力</button>
-            <button class="btn" onclick="generateSummary()">要約</button>
-        </div>
-        <pre>{{ script_text }}</pre>
+    <div class="header">
+        <h1>Podcast 台本生成ツール</h1>
+        <nav>
+            <a href="{{ url_for('index') }}" class="nav-link">台本生成</a>
+            <a href="{{ url_for('history') }}" class="nav-link">過去の出力</a>
+        </nav>
     </div>
 
-    {% if summary %}
-    <div class="summary-section">
-        <h2>要約</h2>
-        <div class="summary-box">{{ summary }}</div>
-    </div>
-    {% endif %}
-    {% endif %}
+    <div class="main-content">
+        <form method="post" class="input-form">
+            <div class="form-group">
+                <label for="title">タイトル:</label>
+                <input type="text" id="title" name="title" value="{{ title }}" required class="input-field">
+            </div>
 
-    <div class="historical-scripts">
-        <h2>過去の出力</h2>
-        {% for script in historical_scripts %}
-        <div class="script-info">
-            <div class="script-title">{{ script.title }} ({{ script.date }})</div>
+            <div class="form-group">
+                <label for="input_text">入力テキスト（参考情報等）:</label>
+                <textarea id="input_text" name="input_text" rows="10" required>{{ input_text }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="urls">参考元URL（複数可、1行に1つ）:</label>
+                <textarea id="urls" name="urls" rows="5">{{ urls }}</textarea>
+            </div>
+
             <div class="button-group">
-                <button class="btn" onclick="showScript('{{ script.id }}')">表示</button>
-                <button class="btn" onclick="createJson('{{ script.id }}')">JSONコード作成</button>
-                <button class="btn" onclick="generateMp3('{{ script.id }}')">MP3に出力</button>
-                <button class="btn" onclick="generateSummary('{{ script.id }}')">要約</button>
+                <button type="submit" name="generate_script" class="btn primary">台本生成</button>
+                <button type="submit" name="create_json" class="btn primary">JSONコード作成</button>
+                <button type="submit" name="create_mp3" class="btn primary">MP3に出力</button>
+                <button type="submit" name="summarize" class="btn primary">要約</button>
+            </div>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if script_text %}
+        <div class="output-section">
+            <h2>生成された台本 <span class="char-count">(文字数: {{ script_text|length }}文字)</span></h2>
+            <div class="script-container">
+                {{ script_text }}
             </div>
         </div>
-        {% endfor %}
-    </div>
+        {% endif %}
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="flash-messages">
-            {% for message in messages %}
-                <div class="flash-message">{{ message }}</div>
-            {% endfor %}
+        {% if summary %}
+        <div class="output-section">
+            <h2>要約</h2>
+            <div class="summary-container">
+                {{ summary }}
+            </div>
         </div>
         {% endif %}
-    {% endwith %}
-
-    <script>
-        function addUrlInput() {
-            const container = document.querySelector('#urlInputs');
-            const newInput = document.createElement('div');
-            newInput.className = 'url-input';
-            newInput.innerHTML = '<input type="text" name="urls[]" value="">';
-            container.appendChild(newInput);
-        }
-
-        function createJson(scriptId = null) {
-            const form = new FormData();
-            if (scriptId) {
-                form.append('script_id', scriptId);
-            } else {
-                const scriptText = document.querySelector('pre').textContent;
-                form.append('script_text', scriptText);
-            }
-
-            fetch('/create_json', {
-                method: 'POST',
-                body: form
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('JSONファイルが作成されました');
-                } else {
-                    alert('エラー: ' + (data.error || '不明なエラー'));
-                }
-            });
-        }
-
-        function generateMp3(scriptId = null) {
-            const form = new FormData();
-            if (scriptId) {
-                form.append('script_id', scriptId);
-            }
-
-            fetch('/generate_mp3', {
-                method: 'POST',
-                body: form
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('MP3ファイルが生成されました');
-                } else {
-                    alert('エラー: ' + (data.error || '不明なエラー'));
-                }
-            });
-        }
-
-        function generateSummary(scriptId = null) {
-            const form = new FormData();
-            if (scriptId) {
-                form.append('script_id', scriptId);
-            } else {
-                const scriptText = document.querySelector('pre').textContent;
-                form.append('script_text', scriptText);
-            }
-
-            fetch('/generate_summary', {
-                method: 'POST',
-                body: form
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const summarySection = document.createElement('div');
-                    summarySection.className = 'summary-section';
-                    summarySection.innerHTML = `
-                        <h2>要約</h2>
-                        <div class="summary-box">${data.summary}</div>
-                    `;
-                    
-                    const existingSummary = document.querySelector('.summary-section');
-                    if (existingSummary) {
-                        existingSummary.replaceWith(summarySection);
-                    } else {
-                        document.querySelector('.current-script').after(summarySection);
-                    }
-                } else {
-                    alert('エラー: ' + (data.error || '不明なエラー'));
-                }
-            });
-        }
-
-        function showScript(scriptId) {
-            fetch(`/get_script/${scriptId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert('エラー: ' + (data.error || '不明なエラー'));
-                }
-            });
-        }
-    </script>
+    </div>
 </body>
 </html>
