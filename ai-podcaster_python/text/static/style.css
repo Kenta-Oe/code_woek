@@ -1,23 +1,28 @@
-/* 基本スタイル */
+.char-count {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 1rem;
+}
+/* 全体のスタイル */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #fff5eb;
-    color: #333;
+    background-color: #fff5ec;
 }
 
 /* ヘッダー */
 .header {
-    background-color: #ff8c00;
-    color: white;
+    background-color: #e67e22;
+    color: #000000;
     padding: 1rem 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
 }
 
 .header h1 {
     margin: 0;
-    font-size: 2rem;
+    font-size: 1.8rem;
 }
 
 /* ナビゲーション */
@@ -35,14 +40,15 @@ nav {
 }
 
 .nav-link:hover {
-    background-color: rgba(255,255,255,0.2);
+    background-color: #d35400;
 }
 
 /* メインコンテンツ */
 .main-content {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    margin-bottom: 2rem;
 }
 
 /* フォーム */
@@ -51,58 +57,63 @@ nav {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
 }
 
 .form-group {
     margin-bottom: 1.5rem;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #666;
+    font-weight: bold;
+    color: #000000;
 }
 
 .input-field,
 textarea {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
+    padding: 0.8rem;
+    border: 1px solid #ffccaa;
     border-radius: 4px;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
-/* ボタン */
+/* ボタングループ */
 .button-group {
-    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
 .btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.8rem 1.5rem;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-right: 1rem;
+    white-space: nowrap;
 }
 
-.primary {
-    background-color: #ff8c00;
+.btn.primary {
+    background-color: #e67e22;
     color: white;
 }
 
-.primary:hover {
-    background-color: #ff7300;
+.btn.primary:hover {
+    background-color: #d35400;
 }
 
-.secondary {
-    background-color: #ffa500;
+.btn.secondary {
+    background-color: #f39c12;
     color: white;
 }
 
-.secondary:hover {
-    background-color: #ff9100;
+.btn.secondary:hover {
+    background-color: #e67e22;
 }
 
 /* 出力セクション */
@@ -112,21 +123,26 @@ textarea {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow-x: auto;
 }
 
-.script-container,
-.summary-container {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: #fff9f2;
+.output-section h2 {
+    color: #d35400;
+    margin-top: 0;
+}
+
+.script-container {
+    background-color: #fff5ec;
+    padding: 1.5rem;
     border-radius: 4px;
-}
-
-pre {
     white-space: pre-wrap;
+    overflow-x: auto;
+    max-width: 100%;
     word-wrap: break-word;
-    margin: 0;
-    font-family: inherit;
+    font-family: monospace;
+    overflow-x: auto;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 /* フラッシュメッセージ */
@@ -136,41 +152,79 @@ pre {
 
 .flash-message {
     padding: 1rem;
-    background-color: #ff8c00;
-    color: white;
     border-radius: 4px;
+    background-color: #fef5e7;
+    color: #d35400;
     margin-bottom: 0.5rem;
 }
 
-/* 過去の出力リスト */
+/* 履歴ページのスクリプトリスト */
 .scripts-list {
     display: grid;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .script-item {
     background-color: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.script-item h3 {
-    margin-top: 0;
-    color: #ff8c00;
-}
-
-.script-actions {
+.script-buttons {
+    display: flex;
+    gap: 1rem;
     margin: 1rem 0;
+    flex-wrap: wrap;
 }
 
-.inline-form {
-    display: inline-block;
+.script-button {
+    padding: 0.5rem 1rem;
+    background-color: #e67e22;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.script-button:hover {
+    background-color: #d35400;
 }
 
 .script-content {
-    margin-top: 1rem;
+    background-color: #fff5ec;
     padding: 1rem;
-    background-color: #fff9f2;
     border-radius: 4px;
+    white-space: pre-wrap;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 1rem;
+    }
+
+    .button-group {
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        width: auto;
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+
+    .script-buttons {
+        flex-direction: column;
+    }
+
+    .script-button {
+        width: 100%;
+        text-align: center;
+    }
 }
