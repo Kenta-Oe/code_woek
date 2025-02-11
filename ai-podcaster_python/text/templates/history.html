@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>過去の出力 - Podcast 台本生成ツール</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <h1>過去の出力</h1>
+        <nav>
+            <a href="{{ url_for('index') }}" class="nav-link">台本生成</a>
+            <a href="{{ url_for('history') }}" class="nav-link">過去の出力</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="scripts-list">
+            {% for script in scripts %}
+            <div class="script-item">
+                <h3>{{ script.title }}</h3>
+                <div class="script-actions">
+                    <form method="post" action="{{ url_for('index') }}" class="inline-form">
+                        <input type="hidden" name="script_text" value="{{ script.content }}">
+                        <input type="hidden" name="title" value="{{ script.title }}">
+                        <button type="submit" name="create_json" class="btn secondary">JSONコード作成</button>
+                        <button type="submit" name="create_mp3" class="btn secondary">MP3に出力</button>
+                        <button type="submit" name="summarize" class="btn secondary">要約</button>
+                    </form>
+                </div>
+                <div class="script-content">
+                    <pre>{{ script.content }}</pre>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
