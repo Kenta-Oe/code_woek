@@ -1,12 +1,16 @@
 import os
+from dotenv import load_dotenv
 from api_config import OPENAI_API_KEY
 
-# Flask 設定
-SECRET_KEY = os.environ.get("SECRET_KEY", "default_secret_key")
-DEBUG = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+# .envファイルを読み込む
+load_dotenv()
 
 # OpenAI 設定
-MODEL_NAME = "o1-mini"
+MODEL_NAME = "gpt-3.5-turbo"  # 最新のモデルに更新
+
+# Flask 設定
+SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "default_secret_key")
+DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
 # ディレクトリパス設定
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
