@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def generate_podcast_script(title, input_text, urls):
     try:
         # 固定の挨拶文
-        opening_greeting = "こんにちは、皆さん。ようこそ、私はホストの大江です。"
+        opening_greeting = "こんにちは、皆さん。ようこそ、私はホストのAIアシスタントです。"
         closing_message = "今後もこうしたニュースの背景や影響について、皆さんと一緒に考えていきたいと思います。もしこのエピソードについてご意見や質問がありましたら、ぜひお寄せください。また、ポッドキャストを楽しんでいただけたなら、評価やレビューもお願いします。それでは、次回もお楽しみに。ありがとうございました。"
 
         # プロンプトの作成
@@ -39,7 +39,7 @@ def generate_podcast_script(title, input_text, urls):
 台本の構成：
 {opening_greeting}
 （メインコンテンツ）
- {closing_message}
+{closing_message}
 
 以下の情報をもとに台本を作成してください：
 
@@ -146,7 +146,8 @@ def index():
 
             elif "create_mp3" in request.form:
                 # MP3生成プロセスを実行
-                main_script_path = r"C:\Users\takky\OneDrive\デスクトップ\code_work\code_woek\ai-podcaster_python\main.py"
+                script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                main_script_path = os.path.join(script_dir, "main.py")
                 process = subprocess.run(["python", main_script_path], capture_output=True, text=True)
                 
                 if process.returncode == 0:
