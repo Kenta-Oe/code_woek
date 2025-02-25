@@ -1,0 +1,104 @@
+/* GitPy スタイルシート */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* リポジトリ一覧用のスタイル */
+.repo-card {
+    transition: transform 0.2s ease;
+}
+
+.repo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* コード表示用のスタイル */
+.source {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    overflow-x: auto;
+}
+
+.source pre {
+    margin-bottom: 0;
+}
+
+/* ファイル一覧のスタイル */
+.file-tree {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.file-tree ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.file-item {
+    padding: 5px 0;
+}
+
+.file-item i {
+    margin-right: 5px;
+}
+
+.file-folder {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* コミット履歴のスタイル */
+.commit-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.commit-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.commit-item:last-child {
+    border-bottom: none;
+}
+
+.commit-hash {
+    font-family: monospace;
+    color: #6c757d;
+}
+
+/* マークダウン表示のスタイル */
+.markdown-content {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    margin-top: 1em;
+}
+
+.markdown-content img {
+    max-width: 100%;
+}
+
+/* フォームコントロールのカスタマイズ */
+.custom-file-label::after {
+    content: "参照";
+}
+
+/* 編集エリア */
+.code-editor {
+    font-family: monospace;
+    min-height: 300px;
+}
