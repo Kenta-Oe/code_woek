@@ -29,7 +29,7 @@ if not os.path.exists(REPO_BASE_DIR):
 
 # ユーザー管理（簡易版）
 USERS = {
-    'admin': {'password': 'admin', 'email': 'admin@example.com'}
+    'user1': {'password': 'password123', 'email': 'user1@example.com'}
 }
 
 ###################
