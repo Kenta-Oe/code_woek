@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}GitPy - リポジトリ一覧{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>リポジトリ一覧</h1>
+    </div>
+    <div class="col-md-4 text-right">
+        <a href="{{ url_for('create_repo') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> 新規リポジトリ
+        </a>
+    </div>
+</div>
+
+{% if repos %}
+    <div class="card-deck">
+        {% for repo in repos %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-code-branch text-primary"></i>
+                        <a href="{{ url_for('view_repo', repo_name=repo.name) }}">{{ repo.name }}</a>
+                    </h5>
+                    <p class="card-text text-muted small">
+                        最終更新: {{ repo.last_update }}
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('view_repo', repo_name=repo.name) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> 表示
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> リポジトリがまだありません。「新規リポジトリ」ボタンをクリックして作成してください。
+    </div>
+{% endif %}
+{% endblock %}
